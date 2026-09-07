@@ -1,4 +1,4 @@
-import { getAdminFromRequest } from '@/lib/auth';
+import { requireAdmin } from '@/lib/adminAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -13,9 +13,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!getAdminFromRequest(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const admin = requireAdmin(request);
+  if (admin instanceof NextResponse) return admin;
+
   const body = await request.json();
   const { name, image_url, sort_order, is_active } = body;
   if (!name) return NextResponse.json({ error: 'name is required' }, { status: 400 });

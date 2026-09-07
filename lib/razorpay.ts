@@ -45,3 +45,36 @@ export async function createRazorpayOrder(amount: number, receipt: string) {
 
   return response.json();
 }
+
+// Refund a captured payment. amountPaise omitted = full refund.
+// idempotency_key lets a retried admin click reuse the same refund
+// attempt instead of double-refunding if the first request's response
+// was lost (network blip, admin double-click, etc).
+export async function createRazorpayRefund(
+  razorpayPaymentId: string,
+  amountPaise?: number,
+  idempotencyKey?: string
+) {
+  const body: { amount?: number; speed?: string } = {};
+  if (amountPaise !== undefined) body.amount = amountPaise;
+
+  const headers: Record<string, string> = {
+    Authorization: `Basic ${Buffer.from(
+      `${razorpayInstance.keyId}:${razorpayInstance.keySecret}`
+    ).toString('base64')}`,
+    'Content-Type': 'application/json',
+  };
+  if (idempotencyKey) headers['X-Razorpay-Idempotency'] = idempotencyKey;
+
+  const response = await fetch(
+    `https://api.razorpay.com/v1/payments/${razorpayPaymentId}/refund`,
+    { method: 'POST', headers, body: JSON.stringify(body) }
+  );
+
+  if (!response.ok) {
+    const errBody = await response.json().catch(() => null);
+    throw new Error(errBody?.error?.description || 'Failed to create Razorpay refund');
+  }
+
+  return response.json();
+}

@@ -1,5 +1,4 @@
-import { Footer } from "@/components/Footer";
-import { Navbar } from "@/components/Navbar";
+import { SiteChrome } from "@/components/SiteChrome";
 import { ToasterMount } from "@/components/ToasterMount";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/lib/cart-context";
@@ -48,10 +47,8 @@ export default function RootLayout({
         <AuthProvider>
         <QueryProvider>
           <CartProvider>
-            <Navbar/>
-            <main className="flex-1 pt-16">{children}</main>
-            <Footer/>
-            </CartProvider>
+            <SiteChrome>{children}</SiteChrome>
+          </CartProvider>
         </QueryProvider>
         </AuthProvider>
       </body>
